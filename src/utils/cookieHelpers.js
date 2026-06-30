@@ -15,10 +15,14 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
 
 const clearAuthCookies = (res) => {
   res.clearCookie(cookieConfig.names.accessToken, {
+    ...cookieConfig.accessToken,
     path: cookieConfig.accessToken.path,
+    expires: new Date(0),
   });
   res.clearCookie(cookieConfig.names.refreshToken, {
+    ...cookieConfig.refreshToken,
     path: cookieConfig.refreshToken.path,
+    expires: new Date(0),
   });
 };
 

@@ -2,7 +2,11 @@ const errorHandler = (err, req, res, next) => {
   // 1. Explicitly attach CORS headers right at the start of the error lifecycle
   // This guarantees that the client's browser actually receives the 4xx or 5xx status code
   if (process.env.NODE_ENV === "production") {
-    res.header("Access-Control-Allow-Origin", "https://rsdecor.vercel.app"); // Replace with your actual Vercel URL
+    const origin =
+      req.headers.origin ||
+      process.env.CORS_ORIGIN ||
+      "https://rsdecor.vercel.app";
+    res.header("Access-Control-Allow-Origin", origin);
     res.header("Access-Control-Allow-Credentials", "true");
   }
 
