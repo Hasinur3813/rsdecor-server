@@ -12,8 +12,8 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const baseCookieOptions = {
   httpOnly: true,
-  secure: isProduction,
-  sameSite: process.env.COOKIE_SAME_SITE || "lax",
+  secure: isProduction, // Must be true in production for SameSite=None to work
+  sameSite: isProduction ? "none" : "lax", // 'none' for production cross-site, 'lax' for localhost
 };
 
 module.exports = {

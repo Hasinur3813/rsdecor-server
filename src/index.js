@@ -26,8 +26,8 @@ app.use(morgan("dev"));
 app.use(
   cors({
     origin: [
-      process.env.CORS_ORIGIN || "http://localhost:3000",
       "https://rsdecor.vercel.app",
+      process.env.CORS_ORIGIN || "http://localhost:3000",
     ],
     credentials: true,
   }),
