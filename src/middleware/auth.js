@@ -5,7 +5,8 @@ const User = require("../models/User");
 const AppError = require("../utils/AppError");
 
 exports.protect = async (req, res, next) => {
-  let token = req.cookies?.[cookieConfig.names.accessToken];
+  // console.log(req.cookies);
+  let token = req.cookies?.rs_refresh_token;
 
   if (
     !token &&
@@ -20,7 +21,7 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, jwtConfig.accessSecret);
+    const decoded = jwt.verify(token, jwtConfig.refreshSecret);
     const user = await User.findById(decoded.id);
 
     if (!user || !user.isActive) {

@@ -2,6 +2,7 @@ require("dotenv").config();
 require("express-async-errors");
 const express = require("express");
 const helmet = require("helmet");
+const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
@@ -20,6 +21,7 @@ if (process.env.NODE_ENV === "production") {
 connectDB();
 
 app.use(helmet());
+app.use(morgan("dev"));
 
 app.use(
   cors({
