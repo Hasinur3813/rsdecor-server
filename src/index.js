@@ -23,7 +23,10 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: [
+      process.env.CORS_ORIGIN || "http://localhost:3000",
+      "https://rsdecor.vercel.app",
+    ],
     credentials: true,
   }),
 );
@@ -42,7 +45,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
-app.use("/api/v1/health", healthRoutes);
+app.use("/", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 
 app.use(notFound);
