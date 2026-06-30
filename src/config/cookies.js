@@ -8,12 +8,13 @@ const parseExpiryToMs = (expiry) => {
   return parseInt(match[1], 10) * multipliers[match[2]];
 };
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction =
+  process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
 
 const baseCookieOptions = {
   httpOnly: true,
-  secure: isProduction, // Must be true in production for SameSite=None to work
-  sameSite: isProduction ? "none" : "lax", // 'none' for production cross-site, 'lax' for localhost
+  secure: isProduction, // Must be true in production or Vercel for SameSite=None
+  sameSite: isProduction ? "none" : "strict", // 'none' for production cross-site, 'lax' for localhost
 };
 
 module.exports = {
