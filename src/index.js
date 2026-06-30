@@ -6,13 +6,13 @@ const morgan = require("morgan");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
-const connectDB = require("./src/config/database");
-const errorHandler = require("./src/middleware/errorHandler");
-const notFound = require("./src/middleware/notFound");
-const authRoutes = require("./src/routes/auth");
-const healthRoutes = require("./src/routes/health");
-const uploadRoutes = require("./src/routes/uploads");
-const sliderRoutes = require("./src/routes/sliders");
+const connectDB = require("./config/database");
+const errorHandler = require("./middleware/errorHandler");
+const notFound = require("./middleware/notFound");
+const authRoutes = require("./routes/auth");
+const healthRoutes = require("./routes/health");
+const uploadRoutes = require("./routes/uploads");
+const sliderRoutes = require("./routes/sliders");
 
 const app = express();
 
