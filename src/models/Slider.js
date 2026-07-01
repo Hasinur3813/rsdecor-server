@@ -27,6 +27,11 @@ const sliderSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Active",
+    },
     cta1: {
       label: {
         type: String,

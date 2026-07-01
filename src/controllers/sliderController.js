@@ -36,6 +36,7 @@ const buildSliderDataForCreate = (reqBody, file) => {
     alt: reqBody.alt?.trim() || "",
     badge: reqBody.badge?.trim() || "",
     heading,
+    status: "Active",
     subtext: reqBody.subtext?.trim() || "",
     cta1: {
       label: reqBody.cta1?.label?.trim() || "",
@@ -67,6 +68,7 @@ const buildSliderDataForUpdate = (reqBody, file) => {
     update.heading = heading;
   }
   if (reqBody.subtext !== undefined) update.subtext = reqBody.subtext.trim();
+  if (reqBody.status !== undefined) update.status = reqBody.status;
 
   if (reqBody.cta1) {
     update.cta1 = {
@@ -96,9 +98,69 @@ exports.createSlider = catchAsync(async (req, res) => {
   res.status(201).json({ success: true, data: slider });
 });
 
-exports.getSliders = catchAsync(async (_req, res) => {
-  const sliders = await Slider.find().sort({ sliderId: 1 });
-  res.status(200).json({ success: true, count: sliders.length, data: sliders });
+exports.getSliders = catchAsync(async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    sort = "sliderId",
+    order = "asc",
+    status,
+  } = req.query;
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
+  const skip = (pageNum - 1) * limitNum;
+
+  // Build filter query
+  const filter = {};
+
+  if (search) {
+    const regex = new RegExp(search, "i");
+    filter.$or = [
+      { heading: regex },
+      { subtext: regex },
+      { badge: regex },
+    ];
+  }
+
+  if (status && status !== "All") {
+    filter.status = status;
+  }
+
+  // Build sort object
+  const sortField = ["sliderId", "heading", "status", "createdAt"].includes(sort)
+    ? sort
+    : "sliderId";
+  const sortDir = order === "desc" ? -1 : 1;
+
+  const [sliders, totalItems, totalSliders, activeSliders] = await Promise.all([
+    Slider.find(filter)
+      .sort({ [sortField]: sortDir })
+      .skip(skip)
+      .limit(limitNum),
+    Slider.countDocuments(filter),
+    Slider.countDocuments({}),
+    Slider.countDocuments({ status: "Active" }),
+  ]);
+
+  const totalPages = Math.ceil(totalItems / limitNum);
+
+  res.status(200).json({
+    success: true,
+    count: sliders.length,
+    totalSliders,
+    activeSliders,
+    data: sliders,
+    pagination: {
+      currentPage: pageNum,
+      totalPages,
+      totalItems,
+      itemsPerPage: limitNum,
+      hasNextPage: pageNum < totalPages,
+      hasPrevPage: pageNum > 1,
+    },
+  });
 });
 
 exports.getSlider = catchAsync(async (req, res) => {
