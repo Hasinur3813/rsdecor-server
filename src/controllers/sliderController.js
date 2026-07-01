@@ -2,7 +2,6 @@ const Slider = require("../models/Slider");
 const Counter = require("../models/Counter"); // see note below
 const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
-
 /**
  * Atomically reserves the next sliderId using a dedicated counter
  * document. findOne().sort() is not safe under concurrent requests —

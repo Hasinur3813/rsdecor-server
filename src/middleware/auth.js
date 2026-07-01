@@ -5,15 +5,29 @@ const User = require("../models/User");
 const AppError = require("../utils/AppError");
 
 exports.protect = async (req, res, next) => {
-  // console.log(req.cookies);
-  let token = req.cookies?.rs_refresh_token;
+  let token = null;
+  let secret = null;
 
+  // 1. Try access token cookie (path: "/", available on all routes)
+  if (req.cookies?.[cookieConfig.names.accessToken]) {
+    token = req.cookies[cookieConfig.names.accessToken];
+    secret = jwtConfig.accessSecret;
+  }
+
+  // 2. Fall back to refresh token cookie (path: "/api/v1/auth", only on auth routes)
+  if (!token && req.cookies?.[cookieConfig.names.refreshToken]) {
+    token = req.cookies[cookieConfig.names.refreshToken];
+    secret = jwtConfig.refreshSecret;
+  }
+
+  // 3. Fall back to Bearer header
   if (
     !token &&
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+    secret = jwtConfig.accessSecret;
   }
 
   if (!token) {
@@ -21,7 +35,7 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, jwtConfig.refreshSecret);
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id);
 
     if (!user || !user.isActive) {

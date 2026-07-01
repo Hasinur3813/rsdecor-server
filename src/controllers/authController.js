@@ -61,6 +61,39 @@ exports.login = async (req, res) => {
   });
 };
 
+exports.adminLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new AppError("Please provide email and password", 400);
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user || !(await user.matchPassword(password))) {
+    throw new AppError("Invalid credentials", 401);
+  }
+
+  if (user.role !== "admin") {
+    throw new AppError("Access denied. Admin credentials required.", 403);
+  }
+
+  if (!user.isActive) {
+    throw new AppError("Account is inactive", 401);
+  }
+
+  const accessToken = user.getSignedJwtAccessToken();
+  const refreshToken = user.getSignedJwtRefreshToken();
+
+  setAuthCookies(res, accessToken, refreshToken);
+
+  res.status(200).json({
+    success: true,
+    message: "Admin login successful",
+    data: { user: formatUser(user) },
+  });
+};
+
 exports.refreshToken = async (req, res) => {
   const refreshToken = req.cookies?.[cookieConfig.names.refreshToken];
 

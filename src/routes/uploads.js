@@ -3,6 +3,7 @@ const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
 const uploadController = require("../controllers/uploadController");
+const { protect } = require("../middleware/auth");
 
 const storage = new CloudinaryStorage({
   cloudinary,
@@ -28,6 +29,6 @@ const upload = multer({
 });
 
 const router = express.Router();
-router.post("/", upload.single("image"), uploadController.uploadImage);
+router.post("/", protect,upload.single("image"), uploadController.uploadImage);
 
 module.exports = router;

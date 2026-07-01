@@ -29,7 +29,7 @@ app.use(
   cors({
     origin: [
       process.env.CORS_ORIGIN || "http://localhost:3000",
-      "https://rsdecor.vercel.app",
+      "https://rsdecor.vercel.app","https://rsdecor-admin.vercel.app"
     ],
     credentials: true,
   }),
