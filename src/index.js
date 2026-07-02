@@ -22,22 +22,62 @@ if (process.env.NODE_ENV === "production") {
 
 connectDB();
 
-app.use(helmet());
+
+// app.use(
+//   cors({
+//     origin: [
+//       process.env.CORS_ORIGIN || "http://localhost:3000",
+//       "https://rsdecor.vercel.app",
+//       "https://rsdecor-admin.vercel.app"
+//     ],
+//     credentials: true,
+//   }),
+// );
+
+// Move Helmet down, or configure it to allow cross-origin requests
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allows images/resources to be read cross-origin
+  })
+);
 app.use(morgan("dev"));
+
+// Upgraded CORS configuration
+const allowedOrigins = [
+  process.env.CORS_ORIGIN,
+  "https://rsdecor.vercel.app",
+  "https://rsdecor-admin.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173" // Vite default just in case
+].filter(Boolean); // Removes undefined values if process.env.CORS_ORIGIN isn't set
 
 app.use(
   cors({
-    origin: [
-      process.env.CORS_ORIGIN || "http://localhost:3000",
-      "https://rsdecor.vercel.app","https://rsdecor-admin.vercel.app"
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, Postman, or server-to-server)
+      if (!origin) return callback(null, true);
+      
+      // Check if origin matches allowed array OR is a Vercel preview deployment
+      const isAllowed = allowedOrigins.includes(origin) || origin.endsWith(".vercel.app");
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   }),
 );
 
+// CRUCIAL: Explicitly handle Preflight OPTIONS requests right after CORS
+app.options("*", cors());
+
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15 minutes (15 * 60 seconds * 1000ms)
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,             // Maximum 100 requests per windowMs
   message: {
     success: false,
     message: "Too many requests, please try again later.",
